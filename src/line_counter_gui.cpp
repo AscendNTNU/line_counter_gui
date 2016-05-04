@@ -60,8 +60,8 @@ public:
                 cv::Point2i(minimapOrigoX +(int)((i-minimapHeight/2)*minimapMeter),minimapOrigoY + minimapHeight/2*minimapMeter),
                 cv::Scalar(255, 255, 255));
       }
-      int stateypos = (int)(minimapOrigoY - counterPose.pose.position.x*minimapMeter);
-      int statexpos = (int)(minimapOrigoX - counterPose.pose.position.y*minimapMeter);
+      int stateypos = (int)(minimapOrigoY - counterPose.pose.position.y*minimapMeter);
+      int statexpos = (int)(minimapOrigoX + counterPose.pose.position.x*minimapMeter);
       cv::circle(minimap, cv::Point2i(statexpos, stateypos), 5, cv::Scalar(255, 0, 255));
       geometry_msgs::Quaternion q = counterPose.pose.orientation;
       float theta = atan2(2*(q.w*q.z + q.x*q.y), 1 - 2*(q.y*q.y + q.z*q.z)) + CV_PI/2;
@@ -81,14 +81,21 @@ public:
 
 	void callback(const geometry_msgs::PoseStamped& input)
 	{
+    geometry_msgs::PoseStamped tmp = counterPose;
     counterPose = input;
-    //drawMinimap();
+    if(counterPose.pose.position.x == 1e9){
+      counterPose.pose.position.x = tmp.pose.position.x;
+    }
+    if(counterPose.pose.position.y == 1e9){
+      counterPose.pose.position.y = tmp.pose.position.y;
+    }
+    drawMinimap();
 	}
 
   void callback_mavros(const geometry_msgs::PoseStamped &pose){
     //return;
     mavrosPose = pose;
-    drawMinimap();
+    //drawMinimap();
   }
 
 private:
